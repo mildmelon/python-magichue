@@ -1,10 +1,8 @@
 # python-magichue
 
-![demo](https://github.com/namacha/python-magichue/raw/image/hue.gif)
+MagicHue (aka MagicHome) is a cheap smart led bulb that you can control hue/saturation/brightness and power over WiFi. They are available at Amazon or other online web shop.
 
-Magichue(as known as Magichome) is a cheap smart led bulb that you can controll hue/saturation/brightnes and power over WiFi. They are available at Amazon or other online web shop.
-
-I tested this library with RGBWWCW(v7), RGB(v8), RGBWW(v8) bulbs.
+I tested this library with RGB+WW+CW(v7), RGB(v8), RGB+WW(v8) bulbs.
 
 # Example
 Rainbow cross-fade.
@@ -13,14 +11,12 @@ import time
 import magichue
 
 
-light = magichue.Light('192.168.0.20')  # change address
-if not light.on:
-    light.on = True
+light = magichue.Light('192.168.0.20')  # change to your address
 
-if light.is_white:
-  light.is_white = False
-
-light.rgb = (255, 255, 255)
+light.on = True
+light.is_white = False
+light.saturation = 1
+light.brightness = 255
 
 for hue in range(1000):
     light.hue = hue / 1000
@@ -28,65 +24,68 @@ for hue in range(1000):
 
 ```
 
-
 # Installation
 ```
-$ pip install python-magichue
+$ pip install magichue
 ```
 
 # Usage
 import magichue.
 ```python
 import magichue
+
 light = magichue.Light('192.168.0.20')
 ```
 
-## Discover bulbs on lan
+## Discover Bulbs on LAN
 ```python
 from magichue import discover_bulbs
 
-
-print(discover_bulbs())  # returns list of bulb address
+print(discover_bulbs())  # returns a list of bulb addresses
 ```
 
 ## Power State
 
-### Getting power status.
+### Getting Power Status
 ```python
 print(light.on)  # => True if light is on else False
 ```
 
-### Setting light on/off.
+### Setting Light On/Off
 ```python
 light.on = True
 light.on = False
 ```
 
-## Getting color
-This shows a tuple of current RGB.
+## Getting Color
+This shows a tuple of current RGB:
 ```python
-print(light.rgb)
+print(light.rgb)  # (255, 127, 63)
 ```
-or access individually.
+or access individually:
 ```python
-print(light.r)
-print(light.g)
-print(light.b)
+print(light.r)  # 255
+print(light.g)  # 127
+print(light.b)  # 63
 ```
 
 ## White LEDs
-If your bulbs support white leds, you can change brightness(0-255) of white leds.
+If your bulbs support white LEDs, you can change the brightness (0-255) of white LEDs.
 
-To use white led,
+Enable the white led:
 ```python
 light.is_white = True
-# light.is_white = False  # This disables white led.
 ```
 
-**If white led is enabled, you can't change color of bulb!**
-So, you need to execute ``` light.is_white = False ``` before changing color.
+**If white led is enabled, you can't change color of bulb!**  
+You will need to disable it before you can change the color.
 
-### Warm White(ww)
+Disable the white led:
+```python
+light.is_white = False
+```
+
+### Warm White (ww)
 ```python
 light.cw = 0
 light.w = 255
@@ -98,65 +97,69 @@ light.w = 0
 light.cw = 255
 ```
  
-## Setting color
-### By rgb
+## Setting Color
+
+### Red, Green, Blue (RGB)
+Assign all colors with a tuple of integers:
 ```python
 light.rgb = (128, 0, 32)
 ```
-or
+or assign each color individually with an integer:
 ```python
 light.r = 200
 light.g = 0
 light.b = 32
 ```
 
-### By hsb
+### Hue, Saturation, Brightness (HSB)
+Hue and saturation are float values from 0 to 1.  
+Brightness is a integer value from 0 to 255.
 ```python
 light.hue = 0.3
 light.saturation = 0.6
 light.brightness = 255
 ```
-hue, saturation are float value from 0 to 1. brightness is a integer value from 0 to 255.
-These variables are also readable.
 
-### Note about stripe bulb
-Stripe bulb doesn't seem to allow jump to another color when you change color.
-To disable fading effect,
+### Note About Stripe Bulb
+Stripe bulb doesn't seem to allow jumping to another color when you change color.
+
+To disable the fading effect,
 ```python
-light.rgb = (128, 0, 20)  # It fades
-light.allow_fading = False  # True by default
-light.rgb = (20, 0, 128)  # Jumps
+light.rgb = (128, 0, 20)    # Fades to set color
+light.allow_fading = False  # Set to True by default
+light.rgb = (20, 0, 128)    # Jumps to set color
 ```
 
+## Changing Modes
+MagicHue bulb has built-in patterns.
 
-## Changing mode
-Magichue blub has a built-in flash patterns.
-
-To check current mode, just
+Check current mode:
 ```python
-print(light.mode.name)  # string name of mode
-print(light.mode.value)  # integer value
+print(light.mode)           # <Mode: NORMAL>
+print(light.mode.name)      # 'NORMAL'
+print(light.mode.value)     # 97
 ```
 
-and changing modes,
+Set current mode:
 ```python
 light.mode = magichue.RAINBOW_CROSSFADE
 ```
 
-
-These are built-in modes.
-```
-RAINBOW_CROSSFADE
+These are the built-in modes:
+```text
 RED_GRADUALLY
 GREEN_GRADUALLY
 BLUE_GRADUALLY
 YELLOW_GRADUALLY
-BLUE_GREEN_GRADUALLY
 PURPLE_GRADUALLY
 WHITE_GRADUALLY
+BLUE_GREEN_GRADUALLY
+
+RAINBOW_CROSSFADE
 RED_GREEN_CROSSFADE
 RED_BLUE_CROSSFADE
 GREEN_BLUE_CROSSFADE
+
 RAINBOW_STROBE
 GREEN_STROBE
 BLUE_STROBE
@@ -164,37 +167,30 @@ YELLOW_STROBE
 BLUE_GREEN_STROBE
 PURPLE_STROBE
 WHITE_STROBE
+
 RAINBOW_FLASH
 NORMAL
 ```
 
+### Changing The Speed of a Mode
 
-### Changing the speed of mode
-
-speed is a float value from 0 to 1.
-
+The instance member `speed` is a float value from 0 to 1:
 ```python
-print(light.speed)
-
 light.speed = 0.5  # set speed to 50%
 ```
 
-
-
-
-### Custom Modes
+### Creating Custom Modes
 You can create custom light flash patterns.
 
-**mode**
-- MODE_JUMP
-- MODE_GRADUALLY
-- MODE_STROBE
+**Mode:**
+```text
+MODE_JUMP
+MODE_GRADUALLY
+MODE_STROBE
+```
 
-**speed**
-A float value 0 to 1
-
-**colors**
-A list of rgb(tuple or list) which has less than 17 length.
+**Speed:** A float value 0 to 1.  
+**Colors:** A list of RGB tuples. Max length of 17 tuples.
 
 ```python
 from magichue import (
@@ -219,8 +215,6 @@ mypattern1 = CustomMode(
 light.mode = mypattern1
 ```
 
-
-
-
+---
 
 Other features are in development.
