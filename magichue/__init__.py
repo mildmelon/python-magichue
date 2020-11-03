@@ -3,6 +3,6 @@ from .modes import *
 from .discover import discover_bulbs
 
 
-__author__ = 'namacha'
+__author__ = 'mildmelon'
 __version__ = '0.2.9.2'
 __license__ = 'MIT'
